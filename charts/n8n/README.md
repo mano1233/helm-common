@@ -94,14 +94,16 @@ The following table lists the configurable parameters of the n8n chart and their
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `n8n.database.type` | Database type | `postgresql` |
-| `n8n.database.host` | Database host | `postgresql` |
 | `n8n.database.port` | Database port | `5432` |
-| `n8n.database.database` | Database name | `n8n` |
-| `n8n.database.user` | Database user | `n8n` |
-| `n8n.database.password` | Database password | `n8n` |
 | `n8n.database.schema` | Database schema | `public` |
 | `n8n.database.ssl.enabled` | Enable SSL | `false` |
 | `n8n.database.ssl.rejectUnauthorized` | Reject unauthorized SSL | `false` |
+
+Note: When using the built-in PostgreSQL (enabled by default), the following database parameters are managed by the PostgreSQL subchart:
+- `n8n.database.host` is automatically set to the PostgreSQL service name
+- `n8n.database.database` is set to `postgresql.auth.database`
+- `n8n.database.user` is set to `postgresql.auth.username`
+- `n8n.database.password` is set to `postgresql.auth.password`
 
 #### Server Configuration
 
@@ -175,6 +177,8 @@ The following table lists the configurable parameters of the n8n chart and their
 
 ### PostgreSQL Configuration
 
+The chart includes [Bitnami's PostgreSQL chart](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) as a dependency. You can configure it using the following parameters:
+
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `postgresql.enabled` | Enable PostgreSQL | `true` |
@@ -183,6 +187,8 @@ The following table lists the configurable parameters of the n8n chart and their
 | `postgresql.auth.database` | PostgreSQL database | `n8n` |
 | `postgresql.primary.persistence.size` | PostgreSQL storage size | `10Gi` |
 | `postgresql.primary.persistence.storageClass` | PostgreSQL storage class | `""` |
+
+For more configuration options, please refer to the [Bitnami PostgreSQL chart documentation](https://github.com/bitnami/charts/tree/main/bitnami/postgresql#parameters).
 
 ## Upgrading
 
