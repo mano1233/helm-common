@@ -1,0 +1,157 @@
+replicaCount: 1
+
+image:
+  repository: n8nio/n8n
+  pullPolicy: IfNotPresent
+  tag: "1.28.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 5678
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  scaleDownDelaySeconds: 300
+  scaleUpDelaySeconds: 0
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+persistence:
+  enabled: true
+  storageClass: ""
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+
+n8n:
+  # Database configuration
+  database:
+    type: postgresql
+    host: postgresql
+    port: 5432
+    database: n8n
+    user: n8n
+    password: n8n
+    schema: public
+    ssl:
+      enabled: false
+      rejectUnauthorized: false
+
+  # Server configuration
+  server:
+    host: "0.0.0.0"
+    port: 5678
+    protocol: http
+    baseUrl: ""
+
+  # Security configuration
+  security:
+    basicAuth:
+      active: false
+      user: admin
+      password: admin
+    jwt:
+      secret: your-jwt-secret
+      expiresIn: 7d
+
+  # Email configuration
+  email:
+    mode: smtp
+    smtp:
+      host: smtp.example.com
+      port: 587
+      user: your-email@example.com
+      pass: your-password
+      sender: your-email@example.com
+
+  # Features configuration
+  features:
+    externalHooks: false
+    externalSecrets: false
+    sourceControl: false
+    queueMode: false
+
+  # Logging configuration
+  logs:
+    level: info
+    output: console
+    file:
+      path: /home/node/.n8n/logs
+      maxSize: 10m
+      maxFiles: 5
+
+  # User management
+  userManagement:
+    disabled: false
+    smtp:
+      enabled: false
+    ldap:
+      enabled: false
+    saml:
+      enabled: false
+    twoFactor:
+      enabled: false
+      issuer: n8n
+
+  # Workflow configuration
+  workflows:
+    defaultName: "My Workflow"
+    callPolicy: "workflowFromSameOwner"
+    tags:
+      enabled: true
+    history:
+      pruneData: true
+      maxAge: 24h
+
+postgresql:
+  enabled: true
+  auth:
+    username: n8n
+    password: n8n
+    database: n8n
+  primary:
+    persistence:
+      size: 10Gi
+      storageClass: "" 

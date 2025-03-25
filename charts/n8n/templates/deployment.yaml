@@ -1,0 +1,189 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "n8n.fullname" . }}
+  labels:
+    {{- include "n8n.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "n8n.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "n8n.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "n8n.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            # Database configuration
+            - name: DB_TYPE
+              value: {{ .Values.n8n.database.type | quote }}
+            - name: DB_POSTGRESDB_HOST
+              value: {{ .Values.n8n.database.host | quote }}
+            - name: DB_POSTGRESDB_PORT
+              value: {{ .Values.n8n.database.port | quote }}
+            - name: DB_POSTGRESDB_DATABASE
+              value: {{ .Values.n8n.database.database | quote }}
+            - name: DB_POSTGRESDB_USER
+              value: {{ .Values.n8n.database.user | quote }}
+            - name: DB_POSTGRESDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "n8n.fullname" . }}-db
+                  key: password
+            - name: DB_POSTGRESDB_SCHEMA
+              value: {{ .Values.n8n.database.schema | quote }}
+            - name: DB_POSTGRESDB_SSL
+              value: {{ .Values.n8n.database.ssl.enabled | quote }}
+            - name: DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED
+              value: {{ .Values.n8n.database.ssl.rejectUnauthorized | quote }}
+
+            # Server configuration
+            - name: N8N_HOST
+              value: {{ .Values.n8n.server.host | quote }}
+            - name: N8N_PORT
+              value: {{ .Values.n8n.server.port | quote }}
+            - name: N8N_PROTOCOL
+              value: {{ .Values.n8n.server.protocol | quote }}
+            - name: N8N_BASIC_AUTH_ACTIVE
+              value: {{ .Values.n8n.security.basicAuth.active | quote }}
+            - name: N8N_BASIC_AUTH_USER
+              value: {{ .Values.n8n.security.basicAuth.user | quote }}
+            - name: N8N_BASIC_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "n8n.fullname" . }}-auth
+                  key: basic-auth-password
+            - name: N8N_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "n8n.fullname" . }}-auth
+                  key: jwt-secret
+            - name: N8N_JWT_EXPIRATION
+              value: {{ .Values.n8n.security.jwt.expiresIn | quote }}
+
+            # Email configuration
+            - name: N8N_EMAIL_MODE
+              value: {{ .Values.n8n.email.mode | quote }}
+            - name: N8N_SMTP_HOST
+              value: {{ .Values.n8n.email.smtp.host | quote }}
+            - name: N8N_SMTP_PORT
+              value: {{ .Values.n8n.email.smtp.port | quote }}
+            - name: N8N_SMTP_USER
+              value: {{ .Values.n8n.email.smtp.user | quote }}
+            - name: N8N_SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "n8n.fullname" . }}-email
+                  key: smtp-password
+            - name: N8N_SMTP_SENDER
+              value: {{ .Values.n8n.email.smtp.sender | quote }}
+
+            # Features configuration
+            - name: N8N_EXTERNAL_HOOKS
+              value: {{ .Values.n8n.features.externalHooks | quote }}
+            - name: N8N_EXTERNAL_SECRETS
+              value: {{ .Values.n8n.features.externalSecrets | quote }}
+            - name: N8N_SOURCE_CONTROL
+              value: {{ .Values.n8n.features.sourceControl | quote }}
+            - name: N8N_QUEUE_MODE
+              value: {{ .Values.n8n.features.queueMode | quote }}
+
+            # Logging configuration
+            - name: N8N_LOG_LEVEL
+              value: {{ .Values.n8n.logs.level | quote }}
+            - name: N8N_LOG_OUTPUT
+              value: {{ .Values.n8n.logs.output | quote }}
+            - name: N8N_LOG_FILE_PATH
+              value: {{ .Values.n8n.logs.file.path | quote }}
+            - name: N8N_LOG_FILE_MAX_SIZE
+              value: {{ .Values.n8n.logs.file.maxSize | quote }}
+            - name: N8N_LOG_FILE_MAX_FILES
+              value: {{ .Values.n8n.logs.file.maxFiles | quote }}
+
+            # User management
+            - name: N8N_USER_MANAGEMENT_DISABLED
+              value: {{ .Values.n8n.userManagement.disabled | quote }}
+            - name: N8N_USER_MANAGEMENT_SMTP
+              value: {{ .Values.n8n.userManagement.smtp.enabled | quote }}
+            - name: N8N_USER_MANAGEMENT_LDAP
+              value: {{ .Values.n8n.userManagement.ldap.enabled | quote }}
+            - name: N8N_USER_MANAGEMENT_SAML
+              value: {{ .Values.n8n.userManagement.saml.enabled | quote }}
+            - name: N8N_USER_MANAGEMENT_2FA
+              value: {{ .Values.n8n.userManagement.twoFactor.enabled | quote }}
+            - name: N8N_USER_MANAGEMENT_2FA_ISSUER
+              value: {{ .Values.n8n.userManagement.twoFactor.issuer | quote }}
+
+            # Workflow configuration
+            - name: N8N_WORKFLOWS_DEFAULT_NAME
+              value: {{ .Values.n8n.workflows.defaultName | quote }}
+            - name: N8N_WORKFLOWS_CALL_POLICY
+              value: {{ .Values.n8n.workflows.callPolicy | quote }}
+            - name: N8N_WORKFLOWS_TAGS
+              value: {{ .Values.n8n.workflows.tags.enabled | quote }}
+            - name: N8N_WORKFLOWS_HISTORY_PRUNE_DATA
+              value: {{ .Values.n8n.workflows.history.pruneData | quote }}
+            - name: N8N_WORKFLOWS_HISTORY_MAX_AGE
+              value: {{ .Values.n8n.workflows.history.maxAge | quote }}
+
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /home/node/.n8n
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "n8n.fullname" . }}-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }} 
