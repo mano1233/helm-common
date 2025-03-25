@@ -38,18 +38,18 @@ spec:
             - name: DB_TYPE
               value: {{ .Values.n8n.database.type | quote }}
             - name: DB_POSTGRESDB_HOST
-              value: {{ .Values.n8n.database.host | quote }}
+              value: {{ include "n8n.postgresql.host" . | quote }}
             - name: DB_POSTGRESDB_PORT
               value: {{ .Values.n8n.database.port | quote }}
             - name: DB_POSTGRESDB_DATABASE
-              value: {{ .Values.n8n.database.database | quote }}
+              value: {{ .Values.postgresql.auth.database | quote }}
             - name: DB_POSTGRESDB_USER
-              value: {{ .Values.n8n.database.user | quote }}
+              value: {{ .Values.postgresql.auth.username | quote }}
             - name: DB_POSTGRESDB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "n8n.fullname" . }}-db
-                  key: password
+                  name: {{ include "n8n.postgresql.secretName" . }}
+                  key: postgres-password
             - name: DB_POSTGRESDB_SCHEMA
               value: {{ .Values.n8n.database.schema | quote }}
             - name: DB_POSTGRESDB_SSL
