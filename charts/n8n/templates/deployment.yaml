@@ -46,10 +46,14 @@ spec:
             - name: DB_POSTGRESDB_USER
               value: {{ .Values.postgresql.auth.username | quote }}
             - name: DB_POSTGRESDB_PASSWORD
+              {{- if .Values.postgresql.auth.password }}
+              value: {{ .Values.postgresql.auth.password | quote }}
+              {{- else }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "n8n.postgresql.secretName" . }}
-                  key: postgres-password
+                  name: {{ .Values.postgresql.auth.secretName | default (include "n8n.postgresql.fullname" .) }}
+                  key: {{ .Values.postgresql.auth.secretKey }}
+              {{- end }}
             - name: DB_POSTGRESDB_SCHEMA
               value: {{ .Values.n8n.database.schema | quote }}
             - name: DB_POSTGRESDB_SSL
@@ -69,15 +73,23 @@ spec:
             - name: N8N_BASIC_AUTH_USER
               value: {{ .Values.n8n.security.basicAuth.user | quote }}
             - name: N8N_BASIC_AUTH_PASSWORD
+              {{- if .Values.n8n.security.basicAuth.password }}
+              value: {{ .Values.n8n.security.basicAuth.password | quote }}
+              {{- else }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "n8n.fullname" . }}-auth
-                  key: basic-auth-password
+                  name: {{ .Values.n8n.security.basicAuth.secretName }}
+                  key: {{ .Values.n8n.security.basicAuth.secretKey }}
+              {{- end }}
             - name: N8N_JWT_SECRET
+              {{- if .Values.n8n.security.jwt.secret }}
+              value: {{ .Values.n8n.security.jwt.secret | quote }}
+              {{- else }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "n8n.fullname" . }}-auth
-                  key: jwt-secret
+                  name: {{ .Values.n8n.security.jwt.secretName }}
+                  key: {{ .Values.n8n.security.jwt.secretKey }}
+              {{- end }}
             - name: N8N_JWT_EXPIRATION
               value: {{ .Values.n8n.security.jwt.expiresIn | quote }}
 
@@ -91,10 +103,14 @@ spec:
             - name: N8N_SMTP_USER
               value: {{ .Values.n8n.email.smtp.user | quote }}
             - name: N8N_SMTP_PASS
+              {{- if .Values.n8n.email.smtp.password }}
+              value: {{ .Values.n8n.email.smtp.password | quote }}
+              {{- else }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "n8n.fullname" . }}-email
-                  key: smtp-password
+                  name: {{ .Values.n8n.email.smtp.secretName }}
+                  key: {{ .Values.n8n.email.smtp.secretKey }}
+              {{- end }}
             - name: N8N_SMTP_SENDER
               value: {{ .Values.n8n.email.smtp.sender | quote }}
 
@@ -107,6 +123,61 @@ spec:
               value: {{ .Values.n8n.features.sourceControl | quote }}
             - name: N8N_QUEUE_MODE
               value: {{ .Values.n8n.features.queueMode | quote }}
+
+            # External secrets configuration
+            {{- if .Values.n8n.features.externalSecrets }}
+            - name: N8N_EXTERNAL_SECRETS_PROVIDER
+              value: {{ .Values.n8n.externalSecrets.provider | quote }}
+            - name: N8N_EXTERNAL_SECRETS_REGION
+              value: {{ .Values.n8n.externalSecrets.region | quote }}
+            - name: N8N_EXTERNAL_SECRETS_ACCESS_KEY_ID
+              {{- if .Values.n8n.externalSecrets.accessKeyId }}
+              value: {{ .Values.n8n.externalSecrets.accessKeyId | quote }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.n8n.externalSecrets.secretName }}
+                  key: {{ .Values.n8n.externalSecrets.accessKeyIdKey }}
+              {{- end }}
+            - name: N8N_EXTERNAL_SECRETS_SECRET_ACCESS_KEY
+              {{- if .Values.n8n.externalSecrets.secretAccessKey }}
+              value: {{ .Values.n8n.externalSecrets.secretAccessKey | quote }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.n8n.externalSecrets.secretName }}
+                  key: {{ .Values.n8n.externalSecrets.secretAccessKeyKey }}
+              {{- end }}
+            {{- end }}
+
+            # LDAP configuration
+            {{- if .Values.n8n.userManagement.ldap.enabled }}
+            - name: N8N_LDAP_BIND_DN
+              value: {{ .Values.n8n.userManagement.ldap.bindDn | quote }}
+            - name: N8N_LDAP_BIND_PASSWORD
+              {{- if .Values.n8n.userManagement.ldap.password }}
+              value: {{ .Values.n8n.userManagement.ldap.password | quote }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.n8n.userManagement.ldap.secretName }}
+                  key: {{ .Values.n8n.userManagement.ldap.secretKey }}
+              {{- end }}
+            {{- end }}
+
+            # SAML configuration
+            {{- if .Values.n8n.userManagement.saml.enabled }}
+            - name: N8N_SAML_CERT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.n8n.userManagement.saml.secretName }}
+                  key: {{ .Values.n8n.userManagement.saml.certKey }}
+            - name: N8N_SAML_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.n8n.userManagement.saml.secretName }}
+                  key: {{ .Values.n8n.userManagement.saml.keyKey }}
+            {{- end }}
 
             # Logging configuration
             - name: N8N_LOG_LEVEL

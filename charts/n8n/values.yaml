@@ -69,11 +69,7 @@ n8n:
   # Database configuration
   database:
     type: postgresql
-    host: postgresql
     port: 5432
-    database: n8n
-    user: n8n
-    password: n8n
     schema: public
     ssl:
       enabled: false
@@ -91,10 +87,14 @@ n8n:
     basicAuth:
       active: false
       user: admin
-      password: admin
+      password: ""
+      secretName: n8n-auth
+      secretKey: basic-auth-password
     jwt:
-      secret: your-jwt-secret
       expiresIn: 7d
+      secret: ""
+      secretName: n8n-auth
+      secretKey: jwt-secret
 
   # Email configuration
   email:
@@ -103,8 +103,10 @@ n8n:
       host: smtp.example.com
       port: 587
       user: your-email@example.com
-      pass: your-password
       sender: your-email@example.com
+      password: ""
+      secretName: n8n-email
+      secretKey: smtp-password
 
   # Features configuration
   features:
@@ -112,6 +114,16 @@ n8n:
     externalSecrets: false
     sourceControl: false
     queueMode: false
+
+  # External secrets configuration
+  externalSecrets:
+    provider: aws
+    region: us-east-1
+    secretName: n8n-external-secrets
+    accessKeyId: ""
+    secretAccessKey: ""
+    accessKeyIdKey: aws-access-key-id
+    secretAccessKeyKey: aws-secret-access-key
 
   # Logging configuration
   logs:
@@ -129,8 +141,15 @@ n8n:
       enabled: false
     ldap:
       enabled: false
+      bindDn: "cn=admin,dc=example,dc=com"
+      password: ""
+      secretName: n8n-ldap
+      secretKey: bind-password
     saml:
       enabled: false
+      secretName: n8n-saml
+      certKey: saml-cert
+      keyKey: saml-key
     twoFactor:
       enabled: false
       issuer: n8n
@@ -149,8 +168,10 @@ postgresql:
   enabled: true
   auth:
     username: n8n
-    password: n8n
     database: n8n
+    password: ""
+    secretName: ""
+    secretKey: postgres-password
   primary:
     persistence:
       size: 10Gi
