@@ -45,6 +45,5 @@ temp/
 custom-values.yaml
 test-values.yaml
 
-# Chart dependencies
+# Chart dependencies (CI regenerates lock files)
 charts/*/Chart.lock
-!charts/n8n/Chart.lock 
