@@ -3,10 +3,7 @@ name: n8n
 description: A Helm chart for n8n workflow automation platform
 type: application
 version: 0.1.0
-appVersion: "1.28.0"
-maintainers:
-  - name: "Your Name"
-    email: "your.email@example.com"
+appVersion: "2.4.8"
 keywords:
   - n8n
   - workflow
@@ -18,4 +15,4 @@ dependencies:
   - name: postgresql
     version: "12.1.2"
     repository: https://charts.bitnami.com/bitnami
-    condition: postgresql.enabled 
+    condition: postgresql.enabled

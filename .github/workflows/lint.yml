@@ -1,0 +1,29 @@
+name: Lint & Test Charts
+
+on:
+  pull_request:
+    paths:
+      - 'charts/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Add dependency repos
+        run: helm repo add bitnami https://charts.bitnami.com/bitnami
+
+      - name: Build dependencies
+        run: helm dependency build charts/n8n
+
+      - name: Lint chart
+        run: helm lint charts/n8n
+
+      - name: Template chart
+        run: helm template test-release charts/n8n --set n8n.encryptionKey=test-key

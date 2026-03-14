@@ -5,25 +5,15 @@ metadata:
   labels:
     {{- include "n8n.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "n8n.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
         {{- include "n8n.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       serviceAccountName: {{ include "n8n.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -33,219 +23,114 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            # Database configuration
-            - name: DB_TYPE
-              value: {{ .Values.n8n.database.type | quote }}
-            - name: DB_POSTGRESDB_HOST
-              value: {{ include "n8n.postgresql.host" . | quote }}
-            - name: DB_POSTGRESDB_PORT
-              value: {{ .Values.n8n.database.port | quote }}
-            - name: DB_POSTGRESDB_DATABASE
-              value: {{ .Values.postgresql.auth.database | quote }}
-            - name: DB_POSTGRESDB_USER
-              value: {{ .Values.postgresql.auth.username | quote }}
-            - name: DB_POSTGRESDB_PASSWORD
-              {{- if .Values.postgresql.auth.password }}
-              value: {{ .Values.postgresql.auth.password | quote }}
-              {{- else }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.postgresql.auth.secretName | default (include "n8n.postgresql.fullname" .) }}
-                  key: {{ .Values.postgresql.auth.secretKey }}
-              {{- end }}
-            - name: DB_POSTGRESDB_SCHEMA
-              value: {{ .Values.n8n.database.schema | quote }}
-            - name: DB_POSTGRESDB_SSL
-              value: {{ .Values.n8n.database.ssl.enabled | quote }}
-            - name: DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED
-              value: {{ .Values.n8n.database.ssl.rejectUnauthorized | quote }}
-
-            # Server configuration
-            - name: N8N_HOST
-              value: {{ .Values.n8n.server.host | quote }}
-            - name: N8N_PORT
-              value: {{ .Values.n8n.server.port | quote }}
-            - name: N8N_PROTOCOL
-              value: {{ .Values.n8n.server.protocol | quote }}
-            - name: N8N_BASIC_AUTH_ACTIVE
-              value: {{ .Values.n8n.security.basicAuth.active | quote }}
-            - name: N8N_BASIC_AUTH_USER
-              value: {{ .Values.n8n.security.basicAuth.user | quote }}
-            - name: N8N_BASIC_AUTH_PASSWORD
-              {{- if .Values.n8n.security.basicAuth.password }}
-              value: {{ .Values.n8n.security.basicAuth.password | quote }}
-              {{- else }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.n8n.security.basicAuth.secretName }}
-                  key: {{ .Values.n8n.security.basicAuth.secretKey }}
-              {{- end }}
-            - name: N8N_JWT_SECRET
-              {{- if .Values.n8n.security.jwt.secret }}
-              value: {{ .Values.n8n.security.jwt.secret | quote }}
-              {{- else }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.n8n.security.jwt.secretName }}
-                  key: {{ .Values.n8n.security.jwt.secretKey }}
-              {{- end }}
-            - name: N8N_JWT_EXPIRATION
-              value: {{ .Values.n8n.security.jwt.expiresIn | quote }}
-
-            # Email configuration
-            - name: N8N_EMAIL_MODE
-              value: {{ .Values.n8n.email.mode | quote }}
-            - name: N8N_SMTP_HOST
-              value: {{ .Values.n8n.email.smtp.host | quote }}
-            - name: N8N_SMTP_PORT
-              value: {{ .Values.n8n.email.smtp.port | quote }}
-            - name: N8N_SMTP_USER
-              value: {{ .Values.n8n.email.smtp.user | quote }}
-            - name: N8N_SMTP_PASS
-              {{- if .Values.n8n.email.smtp.password }}
-              value: {{ .Values.n8n.email.smtp.password | quote }}
-              {{- else }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.n8n.email.smtp.secretName }}
-                  key: {{ .Values.n8n.email.smtp.secretKey }}
-              {{- end }}
-            - name: N8N_SMTP_SENDER
-              value: {{ .Values.n8n.email.smtp.sender | quote }}
-
-            # Features configuration
-            - name: N8N_EXTERNAL_HOOKS
-              value: {{ .Values.n8n.features.externalHooks | quote }}
-            - name: N8N_EXTERNAL_SECRETS
-              value: {{ .Values.n8n.features.externalSecrets | quote }}
-            - name: N8N_SOURCE_CONTROL
-              value: {{ .Values.n8n.features.sourceControl | quote }}
-            - name: N8N_QUEUE_MODE
-              value: {{ .Values.n8n.features.queueMode | quote }}
-
-            # External secrets configuration
-            {{- if .Values.n8n.features.externalSecrets }}
-            - name: N8N_EXTERNAL_SECRETS_PROVIDER
-              value: {{ .Values.n8n.externalSecrets.provider | quote }}
-            - name: N8N_EXTERNAL_SECRETS_REGION
-              value: {{ .Values.n8n.externalSecrets.region | quote }}
-            - name: N8N_EXTERNAL_SECRETS_ACCESS_KEY_ID
-              {{- if .Values.n8n.externalSecrets.accessKeyId }}
-              value: {{ .Values.n8n.externalSecrets.accessKeyId | quote }}
-              {{- else }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.n8n.externalSecrets.secretName }}
-                  key: {{ .Values.n8n.externalSecrets.accessKeyIdKey }}
-              {{- end }}
-            - name: N8N_EXTERNAL_SECRETS_SECRET_ACCESS_KEY
-              {{- if .Values.n8n.externalSecrets.secretAccessKey }}
-              value: {{ .Values.n8n.externalSecrets.secretAccessKey | quote }}
-              {{- else }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.n8n.externalSecrets.secretName }}
-                  key: {{ .Values.n8n.externalSecrets.secretAccessKeyKey }}
-              {{- end }}
-            {{- end }}
-
-            # LDAP configuration
-            {{- if .Values.n8n.userManagement.ldap.enabled }}
-            - name: N8N_LDAP_BIND_DN
-              value: {{ .Values.n8n.userManagement.ldap.bindDn | quote }}
-            - name: N8N_LDAP_BIND_PASSWORD
-              {{- if .Values.n8n.userManagement.ldap.password }}
-              value: {{ .Values.n8n.userManagement.ldap.password | quote }}
-              {{- else }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.n8n.userManagement.ldap.secretName }}
-                  key: {{ .Values.n8n.userManagement.ldap.secretKey }}
-              {{- end }}
-            {{- end }}
-
-            # SAML configuration
-            {{- if .Values.n8n.userManagement.saml.enabled }}
-            - name: N8N_SAML_CERT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.n8n.userManagement.saml.secretName }}
-                  key: {{ .Values.n8n.userManagement.saml.certKey }}
-            - name: N8N_SAML_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.n8n.userManagement.saml.secretName }}
-                  key: {{ .Values.n8n.userManagement.saml.keyKey }}
-            {{- end }}
-
-            # Logging configuration
-            - name: N8N_LOG_LEVEL
-              value: {{ .Values.n8n.logs.level | quote }}
-            - name: N8N_LOG_OUTPUT
-              value: {{ .Values.n8n.logs.output | quote }}
-            - name: N8N_LOG_FILE_PATH
-              value: {{ .Values.n8n.logs.file.path | quote }}
-            - name: N8N_LOG_FILE_MAX_SIZE
-              value: {{ .Values.n8n.logs.file.maxSize | quote }}
-            - name: N8N_LOG_FILE_MAX_FILES
-              value: {{ .Values.n8n.logs.file.maxFiles | quote }}
-
-            # User management
-            - name: N8N_USER_MANAGEMENT_DISABLED
-              value: {{ .Values.n8n.userManagement.disabled | quote }}
-            - name: N8N_USER_MANAGEMENT_SMTP
-              value: {{ .Values.n8n.userManagement.smtp.enabled | quote }}
-            - name: N8N_USER_MANAGEMENT_LDAP
-              value: {{ .Values.n8n.userManagement.ldap.enabled | quote }}
-            - name: N8N_USER_MANAGEMENT_SAML
-              value: {{ .Values.n8n.userManagement.saml.enabled | quote }}
-            - name: N8N_USER_MANAGEMENT_2FA
-              value: {{ .Values.n8n.userManagement.twoFactor.enabled | quote }}
-            - name: N8N_USER_MANAGEMENT_2FA_ISSUER
-              value: {{ .Values.n8n.userManagement.twoFactor.issuer | quote }}
-
-            # Workflow configuration
-            - name: N8N_WORKFLOWS_DEFAULT_NAME
-              value: {{ .Values.n8n.workflows.defaultName | quote }}
-            - name: N8N_WORKFLOWS_CALL_POLICY
-              value: {{ .Values.n8n.workflows.callPolicy | quote }}
-            - name: N8N_WORKFLOWS_TAGS
-              value: {{ .Values.n8n.workflows.tags.enabled | quote }}
-            - name: N8N_WORKFLOWS_HISTORY_PRUNE_DATA
-              value: {{ .Values.n8n.workflows.history.pruneData | quote }}
-            - name: N8N_WORKFLOWS_HISTORY_MAX_AGE
-              value: {{ .Values.n8n.workflows.history.maxAge | quote }}
-
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+          env:
+            # Timezone configuration
+            - name: GENERIC_TIMEZONE
+              value: {{ .Values.n8n.generic.timezone | default "UTC" | quote }}
+            - name: TZ
+              value: {{ .Values.n8n.generic.timezone | default "UTC" | quote }}
+            # n8n instance configuration
+            - name: N8N_PORT
+              value: "{{ .Values.service.port }}"
+            - name: N8N_EDITOR_BASE_URL
+              value: {{ .Values.n8n.generic.editorBaseUrl | quote }}
+            {{- if .Values.n8n.generic.webhookUrl }}
+            - name: N8N_WEBHOOK_URL
+              value: {{ .Values.n8n.generic.webhookUrl | quote }}
+            - name: WEBHOOK_URL
+              value: {{ .Values.n8n.generic.webhookUrl | quote }}
+            {{- end }}
+            # Database configuration
+            - name: DB_TYPE
+              value: "postgresdb"
+            {{- if .Values.postgresql.enabled }}
+            # Internal PostgreSQL configuration
+            - name: DB_POSTGRESDB_HOST
+              value: {{ include "n8n.postgresql.host" . }}
+            - name: DB_POSTGRESDB_PORT
+              value: "5432"
+            - name: DB_POSTGRESDB_DATABASE
+              value: {{ .Values.postgresql.auth.database }}
+            {{- if .Values.postgresql.usePostgresAdmin }}
+            - name: DB_POSTGRESDB_USER
+              value: "postgres"
+            - name: DB_POSTGRESDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "n8n.postgresql.secretName" . }}
+                  key: postgres-password
+            {{- else }}
+            - name: DB_POSTGRESDB_USER
+              value: {{ .Values.postgresql.auth.username }}
+            - name: DB_POSTGRESDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "n8n.postgresql.secretName" . }}
+                  key: password
+            {{- end }}
+            {{- else }}
+            # External PostgreSQL configuration
+            - name: DB_POSTGRESDB_HOST
+              value: {{ .Values.externalPostgresql.host }}
+            - name: DB_POSTGRESDB_PORT
+              value: {{ .Values.externalPostgresql.port | quote }}
+            - name: DB_POSTGRESDB_DATABASE
+              value: {{ .Values.externalPostgresql.database }}
+            - name: DB_POSTGRESDB_USER
+              value: {{ .Values.externalPostgresql.username }}
+            - name: DB_POSTGRESDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalPostgresql.secretName }}
+                  key: {{ .Values.externalPostgresql.secretKey }}
+            {{- if .Values.externalPostgresql.ssl.enabled }}
+            - name: DB_POSTGRESDB_SSL_ENABLED
+              value: "true"
+            - name: DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED
+              value: {{ .Values.externalPostgresql.ssl.rejectUnauthorized | quote }}
+            {{- end }}
+            {{- end }}
+            # Webhook endpoint configuration
+            {{- if .Values.n8n.generic.webhookEndpoint }}
+            - name: N8N_ENDPOINT_WEBHOOK
+              value: {{ .Values.n8n.generic.webhookEndpoint | quote }}
+            {{- end }}
+            {{- if .Values.n8n.generic.webhookEndpointTest }}
+            - name: N8N_ENDPOINT_WEBHOOK_TEST
+              value: {{ .Values.n8n.generic.webhookEndpointTest | quote }}
+            {{- end }}
+            # Encryption key for credentials
+            - name: N8N_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.n8n.existingSecret | default (printf "%s-encryption" (include "n8n.fullname" .)) }}
+                  key: N8N_ENCRYPTION_KEY
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /
               port: http
-            initialDelaySeconds: 30
-            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /
               port: http
-            initialDelaySeconds: 5
-            periodSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: data
               mountPath: /home/node/.n8n
       volumes:
+        {{- if .Values.persistence.enabled }}
         - name: data
-          {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "n8n.fullname" . }}-data
-          {{- else }}
+        {{- else }}
+        - name: data
           emptyDir: {}
-          {{- end }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

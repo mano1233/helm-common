@@ -1,292 +1,237 @@
 # n8n Helm Chart
 
-This Helm chart deploys [n8n](https://n8n.io/) on a Kubernetes cluster.
+This Helm chart deploys n8n workflow automation platform with PostgreSQL database.
 
 ## Prerequisites
 
 - Kubernetes 1.19+
 - Helm 3.0+
-- PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
-## Installing the Chart
+## Installation
 
-To install the chart with the release name `my-n8n`:
+To install the chart with the release name `n8n`:
 
 ```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm dependency update
-helm install my-n8n .
+helm repo add n8n https://your-helm-repo
+helm install n8n n8n/n8n
 ```
 
-## Secret Management
+## Uninstallation
 
-This chart uses Kubernetes secrets for managing sensitive data. All sensitive values are expected to be stored in external secrets that are not managed by this chart. Here's how to create the required secrets:
-
-### Basic Authentication and JWT Secret
+To uninstall/delete the `n8n` deployment:
 
 ```bash
-kubectl create secret generic n8n-auth \
-  --from-literal=basic-auth-password='your-secure-password' \
-  --from-literal=jwt-secret='your-jwt-secret'
-```
-
-### SMTP Password
-
-```bash
-kubectl create secret generic n8n-email \
-  --from-literal=smtp-password='your-smtp-password'
-```
-
-### LDAP Bind Password (if LDAP is enabled)
-
-```bash
-kubectl create secret generic n8n-ldap \
-  --from-literal=bind-password='your-ldap-password'
-```
-
-### SAML Certificate and Key (if SAML is enabled)
-
-```bash
-kubectl create secret generic n8n-saml \
-  --from-file=saml-cert=path/to/cert.pem \
-  --from-file=saml-key=path/to/key.pem
-```
-
-### External Secrets Provider Credentials (if external secrets are enabled)
-
-```bash
-kubectl create secret generic n8n-external-secrets \
-  --from-literal=aws-access-key-id='your-access-key' \
-  --from-literal=aws-secret-access-key='your-secret-key'
+helm delete n8n
 ```
 
 ## Configuration
 
 The following table lists the configurable parameters of the n8n chart and their default values.
 
-### Global Configuration
-
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `replicaCount` | Number of n8n replicas | `1` |
-| `image.repository` | n8n image repository | `n8nio/n8n` |
-| `image.tag` | n8n image tag | `1.28.0` |
-| `image.pullPolicy` | Image pull policy | `IfNotPresent` |
-| `imagePullSecrets` | Image pull secrets | `[]` |
-| `nameOverride` | Override chart name | `""` |
-| `fullnameOverride` | Override full chart name | `""` |
-
-### Service Account Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `serviceAccount.create` | Create service account | `true` |
-| `serviceAccount.annotations` | Service account annotations | `{}` |
-| `serviceAccount.name` | Service account name | `""` |
-
-### Service Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
+| `image.repository` | Container image repository | `n8nio/n8n` |
+| `image.tag` | Container image tag | `1.24.0` |
+| `image.pullPolicy` | Container image pull policy | `IfNotPresent` |
 | `service.type` | Kubernetes service type | `ClusterIP` |
 | `service.port` | Service port | `5678` |
-
-### Ingress Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
 | `ingress.enabled` | Enable ingress | `false` |
-| `ingress.className` | Ingress class name | `""` |
-| `ingress.annotations` | Ingress annotations | `{}` |
-| `ingress.hosts` | Ingress hosts configuration | `[{host: "chart-example.local", paths: [{path: "/", pathType: "ImplementationSpecific"}]}]` |
-| `ingress.tls` | Ingress TLS configuration | `[]` |
-
-### Resource Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `resources.limits.cpu` | CPU limit | `1000m` |
-| `resources.limits.memory` | Memory limit | `1Gi` |
-| `resources.requests.cpu` | CPU request | `500m` |
-| `resources.requests.memory` | Memory request | `512Mi` |
-
-### Autoscaling Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `autoscaling.enabled` | Enable autoscaling | `false` |
-| `autoscaling.minReplicas` | Minimum replicas | `1` |
-| `autoscaling.maxReplicas` | Maximum replicas | `100` |
-| `autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization | `80` |
-| `autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization | `80` |
-
-### Persistence Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
+| `resources` | Resource limits and requests | See values.yaml |
 | `persistence.enabled` | Enable persistence | `true` |
-| `persistence.storageClass` | Storage class | `""` |
-| `persistence.size` | Storage size | `10Gi` |
-| `persistence.accessModes` | Access modes | `["ReadWriteOnce"]` |
-
-### n8n Configuration
-
-#### Database Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `n8n.database.type` | Database type | `postgresql` |
-| `n8n.database.port` | Database port | `5432` |
-| `n8n.database.schema` | Database schema | `public` |
-| `n8n.database.ssl.enabled` | Enable SSL | `false` |
-| `n8n.database.ssl.rejectUnauthorized` | Reject unauthorized SSL | `false` |
-
-Note: Database credentials are managed by the PostgreSQL subchart.
-
-#### Server Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `n8n.server.host` | Server host | `"0.0.0.0"` |
-| `n8n.server.port` | Server port | `5678` |
-| `n8n.server.protocol` | Server protocol | `http` |
-| `n8n.server.baseUrl` | Base URL | `""` |
-
-#### Security Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `n8n.security.basicAuth.active` | Enable basic authentication | `false` |
-| `n8n.security.basicAuth.user` | Basic auth username | `admin` |
-| `n8n.security.basicAuth.password` | Basic auth password (leave empty to use secret) | `""` |
-| `n8n.security.basicAuth.secretName` | Secret name for basic auth password | `{{ include "n8n.fullname" . }}-basic-auth` |
-| `n8n.security.basicAuth.secretKey` | Secret key for basic auth password | `basic-auth-password` |
-| `n8n.security.jwt.secret` | JWT secret (leave empty to use secret) | `""` |
-| `n8n.security.jwt.secretName` | Secret name for JWT secret | `{{ include "n8n.fullname" . }}-jwt` |
-| `n8n.security.jwt.secretKey` | Secret key for JWT secret | `jwt-secret` |
-| `n8n.security.jwt.expiresIn` | JWT token expiration time | `7d` |
-
-#### Email Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `n8n.email.mode` | Email mode (smtp or ses) | `smtp` |
-| `n8n.email.smtp.host` | SMTP host | `smtp.gmail.com` |
-| `n8n.email.smtp.port` | SMTP port | `587` |
-| `n8n.email.smtp.user` | SMTP username | `""` |
-| `n8n.email.smtp.password` | SMTP password (leave empty to use secret) | `""` |
-| `n8n.email.smtp.secretName` | Secret name for SMTP password | `{{ include "n8n.fullname" . }}-smtp` |
-| `n8n.email.smtp.secretKey` | Secret key for SMTP password | `smtp-password` |
-| `n8n.email.smtp.sender` | SMTP sender email | `""` |
-
-#### Features Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `n8n.features.externalHooks` | Enable external hooks | `false` |
-| `n8n.features.externalSecrets` | Enable external secrets | `false` |
-| `n8n.features.sourceControl` | Enable source control | `false` |
-| `n8n.features.queueMode` | Enable queue mode | `false` |
-
-#### External Secrets Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `n8n.externalSecrets.provider` | External secrets provider | `aws` |
-| `n8n.externalSecrets.region` | AWS region | `us-east-1` |
-| `n8n.externalSecrets.accessKeyId` | AWS access key ID (leave empty to use secret) | `""` |
-| `n8n.externalSecrets.secretAccessKey` | AWS secret access key (leave empty to use secret) | `""` |
-| `n8n.externalSecrets.secretName` | Secret name for AWS credentials | `{{ include "n8n.fullname" . }}-aws` |
-| `n8n.externalSecrets.accessKeyIdKey` | Secret key for AWS access key ID | `aws-access-key-id` |
-| `n8n.externalSecrets.secretAccessKeyKey` | Secret key for AWS secret access key | `aws-secret-access-key` |
-
-#### Logging Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `n8n.logs.level` | Log level | `info` |
-| `n8n.logs.output` | Log output | `console` |
-| `n8n.logs.file.path` | Log file path | `/home/node/.n8n/logs` |
-| `n8n.logs.file.maxSize` | Max log file size | `10m` |
-| `n8n.logs.file.maxFiles` | Max log files | `5` |
-
-#### User Management Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `n8n.userManagement.disabled` | Disable user management | `false` |
-| `n8n.userManagement.smtp.enabled` | Enable SMTP for user management | `false` |
-| `n8n.userManagement.ldap.enabled` | Enable LDAP | `false` |
-| `n8n.userManagement.ldap.bindDn` | LDAP bind DN | `""` |
-| `n8n.userManagement.ldap.password` | LDAP bind password (leave empty to use secret) | `""` |
-| `n8n.userManagement.ldap.secretName` | Secret name for LDAP password | `{{ include "n8n.fullname" . }}-ldap` |
-| `n8n.userManagement.ldap.secretKey` | Secret key for LDAP password | `ldap-password` |
-| `n8n.userManagement.saml.enabled` | Enable SAML | `false` |
-| `n8n.userManagement.saml.secretName` | Secret name for SAML credentials | `n8n-saml` |
-| `n8n.userManagement.saml.certKey` | Secret key for SAML certificate | `saml-cert` |
-| `n8n.userManagement.saml.keyKey` | Secret key for SAML key | `saml-key` |
-| `n8n.userManagement.twoFactor.enabled` | Enable 2FA | `false` |
-| `n8n.userManagement.twoFactor.issuer` | 2FA issuer | `n8n` |
-
-#### Workflow Configuration
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `n8n.workflows.defaultName` | Default workflow name | `"My Workflow"` |
-| `n8n.workflows.callPolicy` | Workflow call policy | `"workflowFromSameOwner"` |
-| `n8n.workflows.tags.enabled` | Enable workflow tags | `true` |
-| `n8n.workflows.history.pruneData` | Prune workflow history | `true` |
-| `n8n.workflows.history.maxAge` | Max history age | `24h` |
-
-### PostgreSQL Configuration
-
-The chart includes [Bitnami's PostgreSQL chart](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) as a dependency. You can configure it using the following parameters:
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `postgresql.enabled` | Enable PostgreSQL deployment | `true` |
+| `persistence.size` | Size of persistent volume | `10Gi` |
+| `persistence.storageClass` | Storage class for persistent volume | `""` |
+| `postgresql.enabled` | Enable PostgreSQL | `true` |
 | `postgresql.auth.username` | PostgreSQL username | `n8n` |
-| `postgresql.auth.password` | PostgreSQL password (leave empty for auto-generated) | `""` |
 | `postgresql.auth.database` | PostgreSQL database name | `n8n` |
-| `postgresql.auth.secretName` | Secret name for PostgreSQL password (leave empty for default) | `""` |
-| `postgresql.auth.secretKey` | Secret key for PostgreSQL password | `postgres-password` |
-| `postgresql.primary.persistence.size` | PostgreSQL storage size | `10Gi` |
-| `postgresql.primary.persistence.storageClass` | PostgreSQL storage class | `""` |
+| `postgresql.primary.persistence.size` | PostgreSQL PVC size | `10Gi` |
 
-Note: By default, the PostgreSQL password is automatically generated by the Bitnami chart and stored in a secret named `{release-name}-postgresql` with the key `postgres-password`. You can override this by setting a custom password or specifying a different secret name.
+## Values
 
-For more configuration options, please refer to the [Bitnami PostgreSQL chart documentation](https://github.com/bitnami/charts/tree/main/bitnami/postgresql#parameters).
-
-## Upgrading
-
-### To 1.0.0
-
-This is the first major release of the n8n Helm chart. If you're upgrading from a previous version, please review the configuration changes and test the upgrade in a non-production environment first.
-
-## Uninstalling the Chart
-
-To uninstall/delete the `my-n8n` deployment:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```bash
-helm delete my-n8n
+helm install n8n n8n/n8n --set persistence.size=20Gi
 ```
 
-This command removes all the Kubernetes components associated with the chart and deletes the release.
+Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example:
 
-## Contributing
+```bash
+helm install n8n n8n/n8n -f values.yaml
+```
 
-Feel free to open issues and pull requests with improvements. 
+## Persistence
 
-## Notes
+n8n requires persistent storage to maintain:
+- Workflow data
+- User preferences
+- Encrypted credentials
+- Execution history
 
-- For all secret configurations, you have three options:
-  1. Leave the password/secret field empty to use the default secret (auto-generated or specified)
-  2. Set a direct password/secret value in the values file
-  3. Use a custom secret by specifying `secretName` and `secretKey`
+The chart supports persistent storage using Kubernetes PersistentVolumeClaim (PVC). By default, persistence is enabled with a size of 10Gi.
 
-- PostgreSQL password is auto-generated by default when using Bitnami's PostgreSQL chart. You can:
-  1. Leave `postgresql.auth.password` empty to use the auto-generated password
-  2. Set a custom password in `postgresql.auth.password`
-  3. Use a custom secret by setting `postgresql.auth.secretName` and `postgresql.auth.secretKey`
+### Configuring Persistence
 
-- When using custom secrets, make sure they exist in the cluster before deploying the chart. 
+1. Basic configuration (uses default storage class):
+```yaml
+persistence:
+  enabled: true
+  size: 10Gi
+```
+
+2. Using a specific storage class:
+```yaml
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: "my-storage-class"
+```
+
+3. Custom access modes:
+```yaml
+persistence:
+  enabled: true
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+    - ReadOnlyMany
+```
+
+### Disabling Persistence
+
+To disable persistence and use temporary storage:
+```yaml
+persistence:
+  enabled: false
+```
+
+## Database Configuration
+
+The chart supports two database configurations:
+
+### 1. Internal PostgreSQL (Default)
+
+By default, the chart deploys a PostgreSQL instance using the Bitnami PostgreSQL chart. The database credentials are automatically generated and stored in a Kubernetes secret.
+
+To use the default configuration:
+```yaml
+postgresql:
+  enabled: true
+  auth:
+    username: n8n
+    database: n8n
+    # Password will be auto-generated
+```
+
+To retrieve the auto-generated password:
+```bash
+kubectl get secret n8n-postgresql -o jsonpath="{.data.postgres-password}" | base64 --decode
+```
+
+### 2. External PostgreSQL
+
+To use an external PostgreSQL instance, disable the internal PostgreSQL and configure the external connection:
+
+```yaml
+postgresql:
+  enabled: false
+
+externalPostgresql:
+  host: "your-postgres-host"
+  port: 5432
+  database: n8n
+  username: n8n
+  secretName: my-postgres-secret
+  secretKey: postgres-password
+  ssl:
+    enabled: false
+    rejectUnauthorized: false
+```
+
+#### Setting up External PostgreSQL
+
+1. Create a secret with your database password:
+```bash
+kubectl create secret generic my-postgres-secret \
+  --from-literal=postgres-password='your-secure-password'
+```
+
+2. Configure SSL (optional):
+```yaml
+externalPostgresql:
+  ssl:
+    enabled: true
+    rejectUnauthorized: true  # For strict SSL verification
+```
+
+## Security
+
+### Basic Authentication
+
+The chart enables basic authentication by default. The credentials are:
+- Username: `admin`
+- Password: Auto-generated and stored in a secret
+
+To retrieve the auto-generated basic auth password:
+```bash
+kubectl get secret n8n-basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode
+```
+
+### Database Security
+
+- Internal PostgreSQL: Uses auto-generated secure passwords
+- External PostgreSQL: Requires manual secret creation
+- SSL support for external PostgreSQL connections
+
+## Troubleshooting
+
+### Database Connection Issues
+
+1. Check if the PostgreSQL pod is running:
+```bash
+kubectl get pods -l app.kubernetes.io/name=postgresql
+```
+
+2. Check PostgreSQL logs:
+```bash
+kubectl logs -l app.kubernetes.io/name=postgresql
+```
+
+3. Verify database credentials:
+```bash
+kubectl get secret n8n-postgresql -o yaml
+```
+
+### Access Issues
+
+1. Check if the service is running:
+```bash
+kubectl get svc n8n
+```
+
+2. Check n8n logs:
+```bash
+kubectl logs -l app.kubernetes.io/name=n8n
+```
+
+3. Verify basic auth credentials:
+```bash
+kubectl get secret n8n-basic-auth -o yaml
+```
+
+### Storage Issues
+
+1. Check PVC status:
+```bash
+kubectl get pvc -l app.kubernetes.io/name=n8n
+```
+
+2. Check PV status:
+```bash
+kubectl get pv
+```
+
+3. Check storage class:
+```bash
+kubectl get storageclass
+``` 

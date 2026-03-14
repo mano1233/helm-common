@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      max-width: 340px;
+      margin: 20px auto;
+      padding: 25px;
+      background: #fffef5;
+      border: 2px solid #2c1810;
+    }
+    .header { text-align: center; border-bottom: 2px double #2c1810; padding-bottom: 15px; }
+    .header h1 { margin: 0; font-size: 26px; color: #2c1810; font-style: italic; }
+    .header p { margin: 5px 0; font-size: 12px; color: #666; }
+    .info { text-align: center; font-size: 13px; margin: 15px 0; color: #444; }
+    .items { margin: 20px 0; }
+    .item { display: flex; justify-content: space-between; font-size: 14px; margin: 8px 0; }
+    .item-name { flex: 1; }
+    .divider { border-top: 1px solid #2c1810; margin: 15px 0; }
+    .totals .item { font-size: 13px; }
+    .grand-total { font-size: 20px; font-weight: bold; color: #2c1810; }
+    .footer { text-align: center; font-size: 12px; margin-top: 20px; color: #666; font-style: italic; }
+    .server { background: #f5f0e0; padding: 10px; border-radius: 5px; margin: 15px 0; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>The Golden Fork</h1>
+    <p>Fine Italian Dining</p>
+    <p>789 Restaurant Row, Austin, TX 78702</p>
+    <p>(512) 555-0456</p>
+  </div>
+  
+  <div class="info">
+    <p><strong>Date:</strong> January 20, 2026 &nbsp; <strong>Time:</strong> 12:45 PM</p>
+    <p>Table 12 &nbsp; | &nbsp; Guests: 4 &nbsp; | &nbsp; Check #2847</p>
+  </div>
+  
+  <div class="server">
+    Server: Michael R. &nbsp; | &nbsp; Business Lunch
+  </div>
+  
+  <div class="items">
+    <div class="item"><span class="item-name">Caesar Salad (2)</span><span>$24.00</span></div>
+    <div class="item"><span class="item-name">Soup of the Day</span><span>$8.50</span></div>
+    <div class="item"><span class="item-name">Chicken Parmesan</span><span>$26.00</span></div>
+    <div class="item"><span class="item-name">Grilled Salmon</span><span>$32.00</span></div>
+    <div class="item"><span class="item-name">Margherita Pizza</span><span>$18.00</span></div>
+    <div class="item"><span class="item-name">Pasta Primavera</span><span>$22.00</span></div>
+    <div class="item"><span class="item-name">Iced Tea (4)</span><span>$14.00</span></div>
+    <div class="item"><span class="item-name">Tiramisu (2)</span><span>$18.00</span></div>
+  </div>
+  
+  <div class="divider"></div>
+  
+  <div class="totals">
+    <div class="item"><span>Subtotal</span><span>$162.50</span></div>
+    <div class="item"><span>Tax (8.25%)</span><span>$13.41</span></div>
+    <div class="divider"></div>
+    <div class="item"><span>Tip (20%)</span><span>$32.50</span></div>
+    <div class="divider"></div>
+    <div class="item grand-total"><span>TOTAL</span><span>$208.41</span></div>
+  </div>
+  
+  <div class="divider"></div>
+  
+  <div class="item" style="font-size: 13px;">
+    <span>AMEX ***3344</span>
+    <span>$208.41</span>
+  </div>
+  <p style="font-size: 11px; text-align: center;">Approval: 293847</p>
+  
+  <div class="footer">
+    <p>Thank you for dining with us!</p>
+    <p>~ Grazie Mille ~</p>
+    <p style="margin-top: 10px;">www.thegoldenfork.com</p>
+  </div>
+</body>
+</html>

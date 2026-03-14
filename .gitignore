@@ -41,6 +41,10 @@ coverage/
 tmp/
 temp/
 
+# User-specific values (not part of the chart)
+custom-values.yaml
+test-values.yaml
+
 # Chart dependencies
 charts/*/Chart.lock
 !charts/n8n/Chart.lock 

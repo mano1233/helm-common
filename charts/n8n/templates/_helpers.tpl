@@ -7,8 +7,6 @@ Expand the name of the chart.
 
 {{/*
 Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
 */}}
 {{- define "n8n.fullname" -}}
 {{- if .Values.fullnameOverride }}
@@ -66,25 +64,9 @@ Get PostgreSQL host
 */}}
 {{- define "n8n.postgresql.host" -}}
 {{- if .Values.postgresql.enabled }}
-{{- printf "%s.%s.svc.cluster.local" (include "n8n.postgresql.fullname" .) .Release.Namespace }}
+{{- printf "%s-postgresql" .Release.Name }}
 {{- else }}
-{{- .Values.n8n.database.host | quote }}
-{{- end }}
-{{- end }}
-
-{{/*
-Get PostgreSQL fullname
-*/}}
-{{- define "n8n.postgresql.fullname" -}}
-{{- if .Values.postgresql.fullnameOverride }}
-{{- .Values.postgresql.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- $name := default "postgresql" .Values.postgresql.nameOverride }}
-{{- if contains $name .Release.Name }}
-{{- .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- .Values.postgresql.externalHost | default "postgresql" }}
 {{- end }}
 {{- end }}
 
@@ -93,12 +75,8 @@ Get PostgreSQL secret name
 */}}
 {{- define "n8n.postgresql.secretName" -}}
 {{- if .Values.postgresql.enabled }}
-{{- if .Values.postgresql.auth.existingSecret }}
-{{- .Values.postgresql.auth.existingSecret }}
+{{- printf "%s-postgresql" .Release.Name }}
 {{- else }}
-{{- include "n8n.postgresql.fullname" . }}
-{{- end }}
-{{- else }}
-{{- include "n8n.fullname" . }}-db
+{{- .Values.postgresql.externalSecretName | default "postgresql" }}
 {{- end }}
 {{- end }} 
