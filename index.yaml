@@ -1,3 +1,26 @@
 apiVersion: v1
-entries: {}
-generated: "2026-01-01T00:00:00Z"
+entries:
+  n8n:
+  - apiVersion: v2
+    appVersion: 2.4.8
+    created: "2026-03-14T08:28:47.627914511+08:00"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.5.6
+    description: A Helm chart for n8n workflow automation platform
+    digest: b08fd00112a16e3239eb3121d91c0ff8d9a04a8862a77feac631855a8d356e3d
+    home: https://n8n.io
+    keywords:
+    - n8n
+    - workflow
+    - automation
+    name: n8n
+    sources:
+    - https://github.com/n8n-io/n8n
+    type: application
+    urls:
+    - https://github.com/mano1233/helm-common/releases/download/n8n-0.1.0/n8n-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-03-14T08:28:47.617547109+08:00"
