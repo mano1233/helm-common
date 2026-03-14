@@ -1,0 +1,127 @@
+replicaCount: 1
+
+image:
+  repository: n8nio/n8n
+  pullPolicy: IfNotPresent
+  tag: ""  # Defaults to Chart.AppVersion if not specified
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 5678
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  scaleUpCooldownPeriod: 60
+  scaleDownCooldownPeriod: 60
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Persistence configuration for n8n
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: ""  # Use default storage class if not specified
+  accessModes:
+    - ReadWriteOnce
+  annotations: {}
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true  # Set to false to use external PostgreSQL
+  auth:
+    username: n8n
+    database: n8n
+    # Password will be auto-generated and stored in a secret
+  # Use postgres admin user instead of custom user
+  # Set to true if you have existing tables owned by postgres
+  usePostgresAdmin: true
+  primary:
+    persistence:
+      size: 10Gi
+  service:
+    type: ClusterIP
+    port: 5432
+
+# External PostgreSQL configuration
+# Only used when postgresql.enabled is false
+externalPostgresql:
+  host: ""  # External PostgreSQL host
+  port: 5432  # External PostgreSQL port
+  database: n8n  # Database name
+  username: n8n  # Database username
+  # Password should be provided via secret
+  secretName: ""  # Name of the secret containing the password
+  secretKey: postgres-password  # Key in the secret containing the password
+  ssl:
+    enabled: false
+    rejectUnauthorized: false
+
+# n8n specific configurations
+# Reference: https://docs.n8n.io/hosting/configuration/environment-variables/
+n8n:
+  # Encryption key for credentials - if not set, a random one will be generated
+  # IMPORTANT: Set this to a fixed value to persist credentials across pod restarts
+  encryptionKey: ""
+  # Use an existing secret for the encryption key instead of creating one
+  existingSecret: ""
+  generic:
+    # Timezone for n8n instance (e.g., "America/New_York", "Europe/London")
+    timezone: "UTC"
+    # Base URL for the n8n editor (e.g., "https://n8n.example.com")
+    editorBaseUrl: ""
+    # External URL for webhooks (e.g., "https://n8n.example.com")
+    # If not set, webhooks will use the editor base URL
+    webhookUrl: ""
+    # Custom webhook endpoint paths (default: "webhook" and "webhook-test")
+    webhookEndpoint: ""
+    webhookEndpointTest: ""
+
+# Webhook URL redirects/aliases
+# Creates nginx proxies that redirect friendly URLs to UUID-based webhook URLs
+# Example:
+#   webhookRedirects:
+#     - name: assistant
+#       alias: assistant-hook
+#       uuid: bf5f0497-841a-4ab2-a195-13b55d540d51
+# This creates: /webhook/assistant-hook/* → /webhook/<uuid>/*
+webhookRedirects: []

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: 'Amazon Ember', Arial, sans-serif;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 30px;
+      background: #fff;
+      border: 1px solid #ddd;
+    }
+    .header { border-bottom: 3px solid #ff9900; padding-bottom: 15px; margin-bottom: 20px; }
+    .logo { font-size: 28px; font-weight: bold; color: #232f3e; }
+    .logo span { color: #ff9900; }
+    .order-info { background: #f3f3f3; padding: 15px; margin: 15px 0; border-radius: 4px; }
+    .order-info h3 { margin: 0 0 10px 0; color: #232f3e; }
+    .order-info p { margin: 5px 0; font-size: 14px; }
+    .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    .items-table th { background: #232f3e; color: white; padding: 10px; text-align: left; font-size: 13px; }
+    .items-table td { padding: 12px 10px; border-bottom: 1px solid #ddd; font-size: 14px; }
+    .items-table .price { text-align: right; }
+    .summary { width: 250px; margin-left: auto; margin-top: 20px; }
+    .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+    .summary-row.total { border-top: 2px solid #232f3e; font-weight: bold; font-size: 18px; color: #b12704; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">amazon<span>.com</span></div>
+    <p style="color: #666; margin: 5px 0;">Order Confirmation & Invoice</p>
+  </div>
+  
+  <div class="order-info">
+    <h3>Order Details</h3>
+    <p><strong>Order #:</strong> 113-4958271-8837294</p>
+    <p><strong>Order Date:</strong> January 19, 2026</p>
+    <p><strong>Ship To:</strong> Tech Solutions LLC, 123 Business Park Dr, Austin, TX 78759</p>
+    <p><strong>Payment Method:</strong> Visa ending in 4892</p>
+  </div>
+  
+  <table class="items-table">
+    <tr>
+      <th>Item</th>
+      <th>Qty</th>
+      <th class="price">Price</th>
+    </tr>
+    <tr>
+      <td>Logitech MX Master 3S Wireless Mouse - Graphite</td>
+      <td>2</td>
+      <td class="price">$198.00</td>
+    </tr>
+    <tr>
+      <td>USB-C Hub Multiport Adapter 7-in-1</td>
+      <td>3</td>
+      <td class="price">$89.97</td>
+    </tr>
+    <tr>
+      <td>AmazonBasics USB-C to Lightning Cable 6ft (2-Pack)</td>
+      <td>1</td>
+      <td class="price">$19.99</td>
+    </tr>
+    <tr>
+      <td>Anker PowerCore 26800 Portable Charger</td>
+      <td>2</td>
+      <td class="price">$91.98</td>
+    </tr>
+  </table>
+  
+  <div class="summary">
+    <div class="summary-row">
+      <span>Items Subtotal:</span>
+      <span>$399.94</span>
+    </div>
+    <div class="summary-row">
+      <span>Shipping & Handling:</span>
+      <span>$0.00</span>
+    </div>
+    <div class="summary-row">
+      <span>Prime Savings:</span>
+      <span style="color: #b12704;">-$15.00</span>
+    </div>
+    <div class="summary-row">
+      <span>Tax (8.25%):</span>
+      <span>$31.76</span>
+    </div>
+    <div class="summary-row total">
+      <span>Order Total:</span>
+      <span>$416.70</span>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <p><strong>Invoice Number:</strong> INV-2026-01-4958271</p>
+    <p>This serves as your invoice for tax purposes.</p>
+    <p>Returns accepted within 30 days. Visit amazon.com/returns</p>
+    <p style="margin-top: 15px;">Amazon.com, Inc. | 410 Terry Avenue North, Seattle, WA 98109</p>
+  </div>
+</body>
+</html>

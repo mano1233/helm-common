@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Receipt Generator - Demo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 { color: #333; }
+    .instructions {
+      background: #e3f2fd;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .instructions h2 { margin-top: 0; color: #1565c0; }
+    .instructions ol { line-height: 1.8; }
+    .receipt-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+    }
+    .receipt-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .receipt-card h3 {
+      background: #333;
+      color: white;
+      margin: 0;
+      padding: 15px;
+    }
+    .receipt-card iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+    }
+    .receipt-card .actions {
+      padding: 15px;
+      background: #f9f9f9;
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-primary { background: #1976d2; color: white; }
+    .btn-secondary { background: #666; color: white; }
+    .category-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    .cat-office { background: #e3f2fd; color: #1565c0; }
+    .cat-travel { background: #fff3e0; color: #e65100; }
+    .cat-meals { background: #fce4ec; color: #c2185b; }
+    .cat-tech { background: #e8f5e9; color: #2e7d32; }
+    .cat-vehicle { background: #f3e5f5; color: #7b1fa2; }
+  </style>
+</head>
+<body>
+  <h1>🧾 Receipt Generator for AI Demo</h1>
+  
+  <div class="instructions">
+    <h2>📋 Instructions</h2>
+    <ol>
+      <li><strong>Open each receipt</strong> in a new window using the "Open Full" button</li>
+      <li><strong>Take a screenshot</strong> (or use browser's Print → Save as PDF)</li>
+      <li><strong>Upload to Google Drive</strong> folder called "Receipts-Inbox"</li>
+      <li><strong>Watch the AI agent</strong> automatically parse and categorize them!</li>
+    </ol>
+    <p><strong>Tip:</strong> On Mac use <code>Cmd+Shift+4</code>, on Windows use <code>Win+Shift+S</code> for screenshots</p>
+  </div>
+  
+  <div class="receipt-grid">
+    <div class="receipt-card">
+      <h3>Staples <span class="category-tag cat-office">Office Supplies</span></h3>
+      <iframe src="receipt_staples_001.html"></iframe>
+      <div class="actions">
+        <a href="receipt_staples_001.html" target="_blank" class="btn btn-primary">Open Full</a>
+        <span style="color: #666; padding: 10px;">$103.32</span>
+      </div>
+    </div>
+    
+    <div class="receipt-card">
+      <h3>Uber <span class="category-tag cat-travel">Travel</span></h3>
+      <iframe src="receipt_uber_002.html"></iframe>
+      <div class="actions">
+        <a href="receipt_uber_002.html" target="_blank" class="btn btn-primary">Open Full</a>
+        <span style="color: #666; padding: 10px;">$40.25</span>
+      </div>
+    </div>
+    
+    <div class="receipt-card">
+      <h3>The Golden Fork <span class="category-tag cat-meals">Meals & Entertainment</span></h3>
+      <iframe src="receipt_restaurant_003.html"></iframe>
+      <div class="actions">
+        <a href="receipt_restaurant_003.html" target="_blank" class="btn btn-primary">Open Full</a>
+        <span style="color: #666; padding: 10px;">$208.41</span>
+      </div>
+    </div>
+    
+    <div class="receipt-card">
+      <h3>Amazon <span class="category-tag cat-tech">Tech & Equipment</span></h3>
+      <iframe src="receipt_amazon_004.html"></iframe>
+      <div class="actions">
+        <a href="receipt_amazon_004.html" target="_blank" class="btn btn-primary">Open Full</a>
+        <span style="color: #666; padding: 10px;">$416.70</span>
+      </div>
+    </div>
+    
+    <div class="receipt-card">
+      <h3>Shell Gas Station <span class="category-tag cat-vehicle">Vehicle & Fuel</span></h3>
+      <iframe src="receipt_gasstation_005.html"></iframe>
+      <div class="actions">
+        <a href="receipt_gasstation_005.html" target="_blank" class="btn btn-primary">Open Full</a>
+        <span style="color: #666; padding: 10px;">$56.29</span>
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin-top: 30px; padding: 20px; background: #fff3e0; border-radius: 8px;">
+    <h3>📊 Expected Parsed Output</h3>
+    <p>After the AI processes these receipts, your Google Sheet will have:</p>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+      <tr style="background: #333; color: white;">
+        <th style="padding: 10px; text-align: left;">Date</th>
+        <th style="padding: 10px; text-align: left;">Vendor</th>
+        <th style="padding: 10px; text-align: left;">Category</th>
+        <th style="padding: 10px; text-align: right;">Total</th>
+        <th style="padding: 10px; text-align: left;">Payment</th>
+      </tr>
+      <tr style="background: #f9f9f9;">
+        <td style="padding: 10px;">2026-01-15</td>
+        <td style="padding: 10px;">Staples</td>
+        <td style="padding: 10px;">Office Supplies</td>
+        <td style="padding: 10px; text-align: right;">$103.32</td>
+        <td style="padding: 10px;">Visa ***4892</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px;">2026-01-18</td>
+        <td style="padding: 10px;">Uber</td>
+        <td style="padding: 10px;">Travel</td>
+        <td style="padding: 10px; text-align: right;">$40.25</td>
+        <td style="padding: 10px;">Mastercard ***7721</td>
+      </tr>
+      <tr style="background: #f9f9f9;">
+        <td style="padding: 10px;">2026-01-20</td>
+        <td style="padding: 10px;">The Golden Fork</td>
+        <td style="padding: 10px;">Meals & Entertainment</td>
+        <td style="padding: 10px; text-align: right;">$208.41</td>
+        <td style="padding: 10px;">Amex ***3344</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px;">2026-01-19</td>
+        <td style="padding: 10px;">Amazon</td>
+        <td style="padding: 10px;">Tech & Equipment</td>
+        <td style="padding: 10px; text-align: right;">$416.70</td>
+        <td style="padding: 10px;">Visa ***4892</td>
+      </tr>
+      <tr style="background: #f9f9f9;">
+        <td style="padding: 10px;">2026-01-21</td>
+        <td style="padding: 10px;">Shell</td>
+        <td style="padding: 10px;">Vehicle & Fuel</td>
+        <td style="padding: 10px; text-align: right;">$56.29</td>
+        <td style="padding: 10px;">Visa ***4892</td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>

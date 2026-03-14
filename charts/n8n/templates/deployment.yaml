@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "n8n.fullname" . }}
+  labels:
+    {{- include "n8n.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "n8n.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "n8n.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "n8n.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            # Timezone configuration
+            - name: GENERIC_TIMEZONE
+              value: {{ .Values.n8n.generic.timezone | default "UTC" | quote }}
+            - name: TZ
+              value: {{ .Values.n8n.generic.timezone | default "UTC" | quote }}
+            # n8n instance configuration
+            - name: N8N_PORT
+              value: "{{ .Values.service.port }}"
+            - name: N8N_EDITOR_BASE_URL
+              value: {{ .Values.n8n.generic.editorBaseUrl | quote }}
+            {{- if .Values.n8n.generic.webhookUrl }}
+            - name: N8N_WEBHOOK_URL
+              value: {{ .Values.n8n.generic.webhookUrl | quote }}
+            - name: WEBHOOK_URL
+              value: {{ .Values.n8n.generic.webhookUrl | quote }}
+            {{- end }}
+            # Database configuration
+            - name: DB_TYPE
+              value: "postgresdb"
+            {{- if .Values.postgresql.enabled }}
+            # Internal PostgreSQL configuration
+            - name: DB_POSTGRESDB_HOST
+              value: {{ include "n8n.postgresql.host" . }}
+            - name: DB_POSTGRESDB_PORT
+              value: "5432"
+            - name: DB_POSTGRESDB_DATABASE
+              value: {{ .Values.postgresql.auth.database }}
+            {{- if .Values.postgresql.usePostgresAdmin }}
+            - name: DB_POSTGRESDB_USER
+              value: "postgres"
+            - name: DB_POSTGRESDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "n8n.postgresql.secretName" . }}
+                  key: postgres-password
+            {{- else }}
+            - name: DB_POSTGRESDB_USER
+              value: {{ .Values.postgresql.auth.username }}
+            - name: DB_POSTGRESDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "n8n.postgresql.secretName" . }}
+                  key: password
+            {{- end }}
+            {{- else }}
+            # External PostgreSQL configuration
+            - name: DB_POSTGRESDB_HOST
+              value: {{ .Values.externalPostgresql.host }}
+            - name: DB_POSTGRESDB_PORT
+              value: {{ .Values.externalPostgresql.port | quote }}
+            - name: DB_POSTGRESDB_DATABASE
+              value: {{ .Values.externalPostgresql.database }}
+            - name: DB_POSTGRESDB_USER
+              value: {{ .Values.externalPostgresql.username }}
+            - name: DB_POSTGRESDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalPostgresql.secretName }}
+                  key: {{ .Values.externalPostgresql.secretKey }}
+            {{- if .Values.externalPostgresql.ssl.enabled }}
+            - name: DB_POSTGRESDB_SSL_ENABLED
+              value: "true"
+            - name: DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED
+              value: {{ .Values.externalPostgresql.ssl.rejectUnauthorized | quote }}
+            {{- end }}
+            {{- end }}
+            # Webhook endpoint configuration
+            {{- if .Values.n8n.generic.webhookEndpoint }}
+            - name: N8N_ENDPOINT_WEBHOOK
+              value: {{ .Values.n8n.generic.webhookEndpoint | quote }}
+            {{- end }}
+            {{- if .Values.n8n.generic.webhookEndpointTest }}
+            - name: N8N_ENDPOINT_WEBHOOK_TEST
+              value: {{ .Values.n8n.generic.webhookEndpointTest | quote }}
+            {{- end }}
+            # Encryption key for credentials
+            - name: N8N_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.n8n.existingSecret | default (printf "%s-encryption" (include "n8n.fullname" .)) }}
+                  key: N8N_ENCRYPTION_KEY
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /home/node/.n8n
+      volumes:
+        {{- if .Values.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "n8n.fullname" . }}-data
+        {{- else }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }} 
