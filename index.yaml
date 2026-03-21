@@ -23,4 +23,22 @@ entries:
     urls:
     - https://github.com/mano1233/helm-common/releases/download/n8n-0.1.0/n8n-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-14T08:28:47.617547109+08:00"
+  simple-app:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2026-03-21T14:31:23.694356813Z"
+    description: A generic Helm chart for simple single-container applications
+    digest: e6d471822d7f69699e21f564ea573b9216007f2664b5c6397032229997e3049e
+    home: https://github.com/mano1233/helm-common
+    keywords:
+    - generic
+    - simple
+    - application
+    name: simple-app
+    sources:
+    - https://github.com/mano1233/helm-common
+    type: application
+    urls:
+    - https://github.com/mano1233/helm-common/releases/download/simple-app-0.1.0/simple-app-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-03-21T14:31:23.694361271Z"
