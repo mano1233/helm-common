@@ -19,11 +19,30 @@ jobs:
       - name: Add dependency repos
         run: helm repo add bitnami https://charts.bitnami.com/bitnami
 
-      - name: Update dependencies
-        run: helm dependency update charts/n8n
+      - name: Update chart dependencies
+        run: |
+          for chart in charts/*/; do
+            if [ -f "$chart/Chart.lock" ] || grep -q 'dependencies:' "$chart/Chart.yaml" 2>/dev/null; then
+              echo "Updating dependencies for $chart"
+              helm dependency update "$chart"
+            fi
+          done
 
-      - name: Lint chart
-        run: helm lint charts/n8n
+      - name: Lint all charts
+        run: |
+          for chart in charts/*/; do
+            echo "Linting $chart"
+            helm lint "$chart"
+          done
 
-      - name: Template chart
-        run: helm template test-release charts/n8n --set n8n.encryptionKey=test-key
+      - name: Template all charts
+        run: |
+          for chart in charts/*/; do
+            name=$(basename "$chart")
+            echo "Templating $name"
+            case "$name" in
+              n8n)         helm template test charts/"$name" --set n8n.encryptionKey=test-key ;;
+              simple-app)  helm template test charts/"$name" --set image.repository=nginx,image.tag=latest ;;
+              *)           helm template test charts/"$name" ;;
+            esac
+          done
