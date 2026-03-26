@@ -109,6 +109,16 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.n8n.existingSecret | default (printf "%s-encryption" (include "n8n.fullname" .)) }}
                   key: N8N_ENCRYPTION_KEY
+            {{- range .Values.extraEnv }}
+            - name: {{ .name }}
+              {{- if .value }}
+              value: {{ .value | quote }}
+              {{- end }}
+              {{- if .valueFrom }}
+              valueFrom:
+                {{- toYaml .valueFrom | nindent 16 }}
+              {{- end }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /

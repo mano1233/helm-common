@@ -116,6 +116,13 @@ n8n:
     webhookEndpoint: ""
     webhookEndpointTest: ""
 
+# Extra environment variables to inject into the n8n container
+# Example:
+#   extraEnv:
+#     - name: N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE
+#       value: "true"
+extraEnv: []
+
 # Webhook URL redirects/aliases
 # Creates nginx proxies that redirect friendly URLs to UUID-based webhook URLs
 # Example:
