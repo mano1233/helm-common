@@ -24,7 +24,9 @@ spec:
           command: ["sh", "-c"]
           args:
             - |
-              cd /home/node/.n8n
+              mkdir -p /home/node/.n8n/nodes
+              cd /home/node/.n8n/nodes
+              npm init -y >/dev/null 2>&1
               {{- range .Values.communityPackages }}
               echo "Installing {{ . }}..."
               npm install --no-fund --no-audit {{ . }}
