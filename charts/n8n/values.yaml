@@ -116,6 +116,15 @@ n8n:
     webhookEndpoint: ""
     webhookEndpointTest: ""
 
+# Community packages to install via init container on startup
+# Uses the same n8n image and shares the emptyDir volume so the
+# main container finds packages at /home/node/.n8n/node_modules/
+# Example:
+#   communityPackages:
+#     - n8n-nodes-mcp
+#     - n8n-nodes-some-other-package
+communityPackages: []
+
 # Extra environment variables to inject into the n8n container
 # Example:
 #   extraEnv:

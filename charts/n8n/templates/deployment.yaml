@@ -17,6 +17,23 @@ spec:
       serviceAccountName: {{ include "n8n.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.communityPackages }}
+      initContainers:
+        - name: install-community-packages
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command: ["sh", "-c"]
+          args:
+            - |
+              cd /home/node/.n8n
+              {{- range .Values.communityPackages }}
+              echo "Installing {{ . }}..."
+              npm install --no-fund --no-audit {{ . }}
+              {{- end }}
+              echo "Community packages installed."
+          volumeMounts:
+            - name: data
+              mountPath: /home/node/.n8n
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
