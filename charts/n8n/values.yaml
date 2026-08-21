@@ -41,6 +41,44 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+# Probes.
+#
+# n8n needs 30s+ to boot on ARM SBCs. Earlier versions of this chart hardcoded
+# a liveness probe on "/" with no initialDelaySeconds and no startupProbe, so
+# the kubelet began killing the container at ~20s -- before it had finished
+# starting. That produced a permanent restart loop (19,412 restarts over 137
+# days on the Midgard cluster) which looked like a clean exit, because n8n
+# handles SIGTERM gracefully and exits 0.
+#
+# The startupProbe now absorbs the slow boot; liveness only takes over once
+# the container has started successfully. Probes hit /healthz rather than "/",
+# which renders the editor UI and is far slower to answer.
+#
+# Set any of these to {} to omit that probe entirely.
+startupProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 30      # allows up to ~150s to boot
+
+livenessProbe:
+  httpGet:
+    path: /healthz          # process is alive; does not check the database
+    port: http
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /healthz/readiness  # also verifies the database connection
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
 autoscaling:
   enabled: false
   minReplicas: 1
