@@ -12,6 +12,19 @@ service:
   type: ClusterIP
   port: 80
   annotations: {}
+  # Only rendered when type is LoadBalancer (e.g. "tailscale" for the
+  # Tailscale operator). Ignored otherwise.
+  loadBalancerClass: ""
+  # Optional multi-port / non-HTTP support. When this list is non-empty it
+  # fully replaces the default single "http" port on BOTH the Service and the
+  # container ports. Each entry: name (required), port (required),
+  # targetPort (optional, defaults to port), protocol (optional, defaults TCP).
+  # Example (UDP game server):
+  #   ports:
+  #     - name: game
+  #       port: 8211
+  #       protocol: UDP
+  ports: []
 
 # Plain env vars and secret refs passed directly to the container spec.
 # Examples:
@@ -64,6 +77,14 @@ resources: {}
   # limits:
   #   cpu: 500m
   #   memory: 512Mi
+
+# Deployment update strategy. Empty ({}) keeps the Kubernetes default
+# (RollingUpdate). Set to Recreate for single-replica apps backed by a
+# ReadWriteOnce PVC, where a rolling update would deadlock on the volume.
+# Example:
+#   strategy:
+#     type: Recreate
+strategy: {}
 
 # Probes are passed directly to the container spec.
 # Examples:
