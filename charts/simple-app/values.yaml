@@ -121,5 +121,8 @@ podSecurityContext: {}
 securityContext: {}
 
 # Escape hatches for advanced use cases.
+# initContainers is passed through verbatim, so entries must carry their own
+# volumeMounts. The PVC volume is named "data" when persistence is enabled.
+initContainers: []
 extraVolumes: []
 extraVolumeMounts: []
